@@ -59,8 +59,23 @@ RUN mkdir -p /data/db /data/configdb \
 	&& chown -R mongodb:mongodb /data/db /data/configdb
 VOLUME /data/db /data/configdb
 
+#install ssh
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssh-server \
+    && rm -rf /var/lib/apt/lists/*
+    
+RUN mkdir -p /var/run/sshd
+RUN mkdir -p /root/.ssh
+#cancel pam limit
+RUN sed -ri 's/session  required    pam_loginuid.so/#session    required    pam_loginuid.so/g' /etc/pam.d/sshd
+
+ADD authorized_keys /root/.ssh/authorized_keys
+ADD run.sh /run.sh
+RUN chmod 755 /run.sh
+EXPOSE 22
+
 COPY docker-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 27017
-CMD ["mongod"]
+CMD ["/run.sh"]
