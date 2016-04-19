@@ -1,5 +1,4 @@
 #!/bin/bash
-/usr/sbin/sshd -D
-
-mongod
+/usr/sbin/sshd -D & 
+exec mongod
 
